@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stelle Cadenti</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0b1020; color: #fff; font-family: system-ui, sans-serif; overflow: hidden; }
+  canvas { display: block; width: 100%; height: 100%; cursor: none; }
+  #hud { position: fixed; top: 12px; left: 16px; font-size: 20px; pointer-events: none; text-shadow: 0 1px 4px #000; }
+  #msg { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: rgba(11,16,32,.75); }
+  #msg h1 { font-size: 44px; margin: 0 0 8px; }
+  #msg p { margin: 4px 0; opacity: .85; }
+  #msg.hidden { display: none; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud"></div>
+<div id="msg">
+  <h1>⭐ Stelle Cadenti</h1>
+  <p>Muovi il mouse (o le frecce ← →) per prendere le stelle.</p>
+  <p>Schiva i meteoriti: hai 3 vite.</p>
+  <p><b>Clicca o premi Spazio per iniziare</b></p>
+</div>
+<script>
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const hud = document.getElementById('hud'), msg = document.getElementById('msg');
+let W, H;
+function resize() { W = cv.width = innerWidth; H = cv.height = innerHeight; }
+addEventListener('resize', resize); resize();
+
+const bg = Array.from({ length: 80 }, () => ({ x: Math.random(), y: Math.random(), s: Math.random() * 1.5 + .5 }));
+let px = innerWidth / 2, items = [], score = 0, lives = 3, best = +localStorage.getItem('stelle-best') || 0;
+let running = false, t = 0, keys = {};
+
+function start() {
+  px = W / 2; items = []; score = 0; lives = 3; t = 0; running = true;
+  msg.classList.add('hidden');
+}
+function end() {
+  running = false;
+  if (score > best) { best = score; localStorage.setItem('stelle-best', best); }
+  msg.innerHTML = `<h1>Game over</h1><p>Punteggio: ${score} · Record: ${best}</p><p><b>Clicca o premi Spazio per rigiocare</b></p>`;
+  msg.classList.remove('hidden');
+}
+
+addEventListener('mousemove', e => { px = e.clientX; });
+addEventListener('touchmove', e => { px = e.touches[0].clientX; });
+addEventListener('keydown', e => {
+  keys[e.key] = true;
+  if (e.key === ' ' && !running) start();
+});
+addEventListener('keyup', e => { keys[e.key] = false; });
+msg.addEventListener('click', () => { if (!running) start(); });
+
+function spawn() {
+  const meteor = Math.random() < Math.min(.15 + score * .005, .5);
+  items.push({ x: Math.random() * (W - 40) + 20, y: -20, meteor, v: 2 + Math.random() * 2 + score * .04 });
+}
+
+function drawStar(x, y, r) {
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + i * Math.PI / 5, d = i % 2 ? r * .45 : r;
+    ctx.lineTo(x + Math.cos(a) * d, y + Math.sin(a) * d);
+  }
+  ctx.closePath(); ctx.fill();
+}
+
+function loop() {
+  t++;
+  ctx.fillStyle = '#0b1020'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#fff';
+  for (const s of bg) ctx.fillRect(s.x * W, s.y * H, s.s, s.s);
+
+  const by = H - 40, bw = 90;
+  if (running) {
+    if (keys.ArrowLeft) px -= 9;
+    if (keys.ArrowRight) px += 9;
+    px = Math.max(bw / 2, Math.min(W - bw / 2, px));
+    if (t % Math.max(20, 50 - Math.floor(score / 3)) === 0) spawn();
+
+    for (const it of items) {
+      it.y += it.v;
+      if (it.y > by - 16 && it.y < by + 10 && Math.abs(it.x - px) < bw / 2 + 8) {
+        it.dead = true;
+        if (it.meteor) { if (--lives <= 0) end(); } else score++;
+      } else if (it.y > H + 20) {
+        it.dead = true;
+      }
+    }
+    items = items.filter(i => !i.dead);
+  }
+
+  for (const it of items) {
+    if (it.meteor) {
+      ctx.fillStyle = '#ff6b4a'; ctx.beginPath(); ctx.arc(it.x, it.y, 14, 0, 7); ctx.fill();
+      ctx.fillStyle = '#c2401f'; ctx.beginPath(); ctx.arc(it.x - 4, it.y - 3, 5, 0, 7); ctx.fill();
+    } else {
+      ctx.fillStyle = '#ffd84a'; drawStar(it.x, it.y, 14);
+    }
+  }
+
+  if (px !== undefined) {
+    ctx.fillStyle = '#6ee7b7';
+    ctx.beginPath(); ctx.roundRect(px - bw / 2, by, bw, 14, 7); ctx.fill();
+  }
+  hud.textContent = `⭐ ${score}   ${'❤️'.repeat(Math.max(lives, 0))}   Record: ${best}`;
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>
