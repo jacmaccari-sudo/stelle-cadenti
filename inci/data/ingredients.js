@@ -252,7 +252,7 @@ window.INCI_DB = [
  d:"Forma sulla pelle una pellicola che blocca l'evaporazione dell'acqua: protegge le pelli molto secche e screpolate. Non penetra e non nutre, resta in superficie.",
  p:"Miscela di idrocarburi saturi, chimicamente inerte, non irrancidisce, non comedogena nelle qualità cosmetiche raffinate, riduce la perdita d'acqua transepidermica fino al 98% (vaselina).",
  t:[2,60],ph:{e:"neutro",v:7},
- r:{t:"limitato",x:"Ammessi solo se completamente raffinati, con storia di raffinazione nota: le frazioni non raffinate sarebbero classificate come cancerogene.",a:"Allegato II (voce 906)"}},
+ r:{t:"limitato",x:"Ammessi solo se completamente raffinati, con storia di raffinazione nota: le frazioni non raffinate sarebbero classificate come cancerogene.",a:"Allegato II"}},
 
 {n:"DIMETHICONE",alt:["DIMETHICONOL","PHENYL TRIMETHICONE","CYCLOMETHICONE","TRIMETHYLSILOXYSILICATE","DIMETHICONE CROSSPOLYMER","METHICONE","CAPRYLYL METHICONE"],c:"Silicone (polisilossano)",g:"funz",f:"emolliente, filmogeno",
  d:"Dà la sensazione setosa e scivolosa a creme, fondotinta e balsami; sui capelli li rende lucidi e pettinabili, sulla pelle attenua otticamente le rughe.",

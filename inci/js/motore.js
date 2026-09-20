@@ -106,7 +106,7 @@
   /* ---------------- avvisi del regolamento ---------------- */
   function avvisi(nome, voce) {
     var out = [], visti = {}, allegati = {};
-    function radice(a) { return String(a || '').replace(/\s*\(.*$/, '').trim(); } // "Allegato V (voce 29)" -> "Allegato V"
+    function radice(a) { return String(a || '').replace(/\s*\(.*$/, '').trim(); } // chiave per non ripetere due avvisi sullo stesso allegato
     if (voce && voce.r) { out.push(voce.r); visti[voce.r.x] = 1; allegati[radice(voce.r.a)] = 1; }
     var pulito = pulisciNome(nome);
     window.INCI_ALERTS.forEach(function (a) {
