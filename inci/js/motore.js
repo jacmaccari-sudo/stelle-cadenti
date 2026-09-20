@@ -105,11 +105,15 @@
 
   /* ---------------- avvisi del regolamento ---------------- */
   function avvisi(nome, voce) {
-    var out = [], visti = {};
-    if (voce && voce.r) { out.push(voce.r); visti[voce.r.x] = 1; }
+    var out = [], visti = {}, allegati = {};
+    function radice(a) { return String(a || '').replace(/\s*\(.*$/, '').trim(); } // "Allegato V (voce 29)" -> "Allegato V"
+    if (voce && voce.r) { out.push(voce.r); visti[voce.r.x] = 1; allegati[radice(voce.r.a)] = 1; }
     var pulito = pulisciNome(nome);
     window.INCI_ALERTS.forEach(function (a) {
-      if (a.re.test(pulito) && !visti[a.x]) { out.push({ t: a.t, x: a.x, a: a.a }); visti[a.x] = 1; }
+      // la scheda della banca dati è più precisa: se copre già quell'allegato, non si ripete l'avviso generico
+      if (!a.re.test(pulito) || visti[a.x] || allegati[radice(a.a)]) return;
+      out.push({ t: a.t, x: a.x, a: a.a });
+      visti[a.x] = 1; allegati[radice(a.a)] = 1;
     });
     return out;
   }

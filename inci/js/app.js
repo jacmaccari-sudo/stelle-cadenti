@@ -93,7 +93,7 @@
       }
     }
     if (r.allergeni.length) {
-      h += '<div class="avviso"><b>🌿 ' + r.allergeni.length + ' allergene' + (r.allergeni.length > 1 ? 'i' : '') + ' del profumo</b>' +
+      h += '<div class="avviso"><b>🌿 ' + r.allergeni.length + (r.allergeni.length > 1 ? ' allergeni' : ' allergene') + ' del profumo</b>' +
         r.allergeni.map(function (x) { return esc(x.nome); }).join(', ') +
         '. ' + (r.allergeni.length > 1 ? 'Vanno scritti' : 'Va scritto') + ' a parte in etichetta proprio per avvisare chi è allergico. Per tutti gli altri non ' +
         (r.allergeni.length > 1 ? 'sono un problema' : 'è un problema') + '.</div>';
