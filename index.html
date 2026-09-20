@@ -2,30 +2,57 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>Stelle Cadenti</title>
+<meta name="description" content="Prendi le stelle, schiva i meteoriti.">
+<meta name="theme-color" content="#0b1020">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
-  html, body { margin: 0; height: 100%; background: #0b1020; color: #fff; font-family: system-ui, sans-serif; overflow: hidden; }
+  html, body {
+    margin: 0; height: 100%; background: #0b1020; color: #fff;
+    font-family: system-ui, sans-serif; overflow: hidden;
+    /* sul telefono: niente scroll, niente zoom, niente selezione del testo */
+    touch-action: none; overscroll-behavior: none;
+    -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
+  }
   canvas { display: block; width: 100%; height: 100%; cursor: none; }
-  #hud { position: fixed; top: 12px; left: 16px; font-size: 20px; pointer-events: none; text-shadow: 0 1px 4px #000; }
-  #msg { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: rgba(11,16,32,.75); }
+  #hud { position: fixed; top: calc(12px + env(safe-area-inset-top)); left: calc(16px + env(safe-area-inset-left)); font-size: 20px; pointer-events: none; text-shadow: 0 1px 4px #000; }
+  #msg { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: rgba(11,16,32,.75); padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom); box-sizing: border-box; }
   #msg h1 { font-size: 44px; margin: 0 0 8px; }
   #msg p { margin: 4px 0; opacity: .85; }
   #msg.hidden { display: none; }
+  #tools { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 22px; }
+  #tools button { font: inherit; font-size: 16px; color: #fff; background: #1c2542; border: 1px solid #38406a; border-radius: 10px; padding: 12px 16px; min-height: 48px; cursor: pointer; }
+  #tools button:active { background: #263156; }
+  #note { min-height: 1.2em; font-size: 14px; opacity: .7; margin-top: 12px; }
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
 <div id="hud"></div>
 <div id="msg">
-  <h1>⭐ Stelle Cadenti</h1>
-  <p>Muovi il mouse (o le frecce ← →) per prendere le stelle.</p>
-  <p>Schiva i meteoriti: hai 3 vite.</p>
-  <p><b>Clicca o premi Spazio per iniziare</b></p>
+  <div id="text">
+    <h1>⭐ Stelle Cadenti</h1>
+    <p>Trascina il dito (o muovi il mouse) per prendere le stelle.</p>
+    <p>Schiva i meteoriti: hai 3 vite.</p>
+    <p><b>Tocca lo schermo per iniziare</b></p>
+  </div>
+  <div id="tools">
+    <button id="save" type="button">☁️ Salva su cloud</button>
+    <button id="load" type="button">📂 Carica salvataggio</button>
+  </div>
+  <p id="note"></p>
+  <input id="file" type="file" accept="application/json,.json" hidden>
 </div>
 <script>
 const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 const hud = document.getElementById('hud'), msg = document.getElementById('msg');
+const text = document.getElementById('text'), note = document.getElementById('note');
 let W, H;
 function resize() { W = cv.width = innerWidth; H = cv.height = innerHeight; }
 addEventListener('resize', resize); resize();
@@ -36,23 +63,72 @@ let running = false, t = 0, keys = {};
 
 function start() {
   px = W / 2; items = []; score = 0; lives = 3; t = 0; running = true;
+  note.textContent = '';
   msg.classList.add('hidden');
 }
 function end() {
   running = false;
   if (score > best) { best = score; localStorage.setItem('stelle-best', best); }
-  msg.innerHTML = `<h1>Game over</h1><p>Punteggio: ${score} · Record: ${best}</p><p><b>Clicca o premi Spazio per rigiocare</b></p>`;
+  text.innerHTML = `<h1>Game over</h1><p>Punteggio: ${score} · Record: ${best}</p><p><b>Tocca lo schermo per rigiocare</b></p>`;
   msg.classList.remove('hidden');
 }
 
 addEventListener('mousemove', e => { px = e.clientX; });
-addEventListener('touchmove', e => { px = e.touches[0].clientX; });
+addEventListener('touchmove', e => { px = e.touches[0].clientX; e.preventDefault(); }, { passive: false });
+addEventListener('touchstart', e => { px = e.touches[0].clientX; }, { passive: true });
 addEventListener('keydown', e => {
   keys[e.key] = true;
   if (e.key === ' ' && !running) start();
 });
 addEventListener('keyup', e => { keys[e.key] = false; });
 msg.addEventListener('click', () => { if (!running) start(); });
+
+/* ---- Salvataggio: esporta/importa un file che puoi tenere nel cloud ---- */
+const SAVE_NAME = 'stelle-cadenti-salvataggio.json';
+const tools = document.getElementById('tools'), picker = document.getElementById('file');
+tools.addEventListener('click', e => e.stopPropagation());   // i bottoni non fanno partire la partita
+
+function saveData() {
+  return JSON.stringify({ app: 'stelle-cadenti', v: 1, best, salvatoIl: new Date().toISOString() }, null, 2);
+}
+
+document.getElementById('save').addEventListener('click', async () => {
+  const file = new File([saveData()], SAVE_NAME, { type: 'application/json' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: 'Stelle Cadenti — salvataggio' });
+      note.textContent = 'Salvataggio inviato. Scegli Drive (o un\'altra app) per conservarlo.';
+      return;
+    } catch (err) {
+      if (err && err.name === 'AbortError') return;   // l'utente ha annullato
+    }
+  }
+  const url = URL.createObjectURL(file);
+  const a = document.createElement('a');
+  a.href = url; a.download = SAVE_NAME; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  note.textContent = 'File scaricato: mettilo nella cartella del tuo cloud.';
+});
+
+document.getElementById('load').addEventListener('click', () => picker.click());
+picker.addEventListener('change', async () => {
+  const f = picker.files[0];
+  picker.value = '';
+  if (!f) return;
+  try {
+    const d = JSON.parse(await f.text());
+    if (d.app !== 'stelle-cadenti' || typeof d.best !== 'number') throw new Error('formato');
+    best = Math.max(best, d.best);
+    localStorage.setItem('stelle-best', best);
+    note.textContent = `Salvataggio letto (record ${d.best}). Record in uso: ${best}.`;
+  } catch {
+    note.textContent = 'Il file non sembra un salvataggio di Stelle Cadenti.';
+  }
+});
+
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+}
 
 function spawn() {
   const meteor = Math.random() < Math.min(.15 + score * .005, .5);
