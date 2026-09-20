@@ -33,7 +33,7 @@ Il record resta sul telefono da solo. Per portarlo altrove:
 
 # 🧴 INCI Chiaro
 
-Seconda app di questo repository (cartella `inci/`): **spiega e classifica gli ingredienti di un cosmetico**
+Seconda app di questo repository (cartella `INCIready/`): **spiega e classifica gli ingredienti di un cosmetico**
 partendo dalla lista INCI dell'etichetta. Anche questa è una PWA, quindi si installa su Android come una normale app.
 
 ## Come si usa
@@ -68,7 +68,7 @@ le quantità esatte le conosce solo il produttore.
 ## Metterla sul telefono Android
 
 Con GitHub Pages attivo (vedi sopra) l'app è su
-`https://jacmaccari-sudo.github.io/stelle-cadenti/inci/`.
+`https://jacmaccari-sudo.github.io/stelle-cadenti/INCIready/`.
 Aprila con Chrome sul telefono e usa **⋮ → Installa app**.
 
 Funziona anche offline. Servono invece internet la lettura della foto
@@ -78,10 +78,10 @@ Funziona anche offline. Servono invece internet la lettura della foto
 
 | File | A cosa serve |
 |---|---|
-| `inci/index.html` | le schermate |
-| `inci/style.css` | l'aspetto (con tema chiaro e scuro) |
-| `inci/js/motore.js` | legge la lista, riconosce gli ingredienti, stima concentrazioni e pH |
-| `inci/js/app.js` | schermate, foto, ricerca del prodotto |
-| `inci/data/ingredients*.js` | le schede degli ingredienti |
-| `inci/data/rules.js` | riconoscimento per somiglianza del nome + elenco sostanze vietate e limitate |
-| `inci/sw.js`, `inci/manifest.webmanifest`, `inci/icon-*.png` | installazione e funzionamento offline |
+| `INCIready/index.html` | le schermate |
+| `INCIready/style.css` | l'aspetto (con tema chiaro e scuro) |
+| `INCIready/js/motore.js` | legge la lista, riconosce gli ingredienti, stima concentrazioni e pH |
+| `INCIready/js/app.js` | schermate, foto, ricerca del prodotto |
+| `INCIready/data/ingredients*.js` | le schede degli ingredienti |
+| `INCIready/data/rules.js` | riconoscimento per somiglianza del nome + elenco sostanze vietate e limitate |
+| `INCIready/sw.js`, `INCIready/manifest.webmanifest`, `INCIready/icon-*.png` | installazione e funzionamento offline |
