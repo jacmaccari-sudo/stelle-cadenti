@@ -1,0 +1,17 @@
+{
+  "name": "INCI Chiaro — capire i cosmetici",
+  "short_name": "INCI Chiaro",
+  "description": "Spiega e classifica gli ingredienti di un cosmetico: classe chimica, proprietà, concentrazioni e pH stimati, avvisi del regolamento europeo 1223/2009.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f7f6",
+  "theme_color": "#0f766e",
+  "lang": "it",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

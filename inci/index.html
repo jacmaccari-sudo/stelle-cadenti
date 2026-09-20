@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>INCI Chiaro</title>
+<meta name="description" content="Spiega e classifica gli ingredienti di un cosmetico secondo l'INCI: classe chimica, proprietà, concentrazioni stimate, pH e avvisi del regolamento europeo 1223/2009.">
+<meta name="theme-color" content="#0f766e">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+<header class="top">
+  <button class="indietro" id="btnIndietro" hidden>‹ Indietro</button>
+  <h1 id="titolo">INCI Chiaro</h1>
+</header>
+<div class="passi" id="passi" hidden>
+  <div class="passo" id="p1"></div><div class="passo" id="p2"></div><div class="passo" id="p3"></div>
+</div>
+
+<main class="wrap">
+
+  <!-- 1. SCELTA DEL MODO DI INSERIMENTO -->
+  <section class="vista attiva" id="v-home">
+    <h2>Come vuoi inserire gli ingredienti?</h2>
+    <p class="sottotitolo">Scegli il modo più comodo: l'app ti dirà che cos'è ogni sostanza, quanta ce n'è, che pH ha il prodotto e se ci sono ingredienti con limiti di legge.</p>
+
+    <button class="scelta" data-va="v-scrivi">
+      <span class="ico">✍️</span>
+      <span><b>Scrivo io gli ingredienti</b><span>Copio o scrivo la lista INCI dell'etichetta</span></span>
+    </button>
+    <button class="scelta" data-va="v-foto">
+      <span class="ico">📷</span>
+      <span><b>Faccio una foto all'etichetta</b><span>L'app legge il testo dalla foto (serve la rete la prima volta)</span></span>
+    </button>
+    <button class="scelta" data-va="v-nome">
+      <span class="ico">🔎</span>
+      <span><b>Scrivo il nome del prodotto</b><span>L'app cerca gli ingredienti in un archivio pubblico di cosmetici</span></span>
+    </button>
+
+    <div class="scheda" style="margin-top:22px">
+      <h3>Che cos'è l'INCI</h3>
+      <p style="margin:0;color:var(--tenue);font-size:14.5px">È la lista degli ingredienti che per legge deve essere scritta su ogni cosmetico, sempre con gli stessi nomi in tutta Europa. Gli ingredienti sono scritti <b>in ordine di quantità</b>: il primo è quello che c'è di più. Sotto l'1% l'ordine non conta più e i coloranti vanno sempre in fondo.</p>
+    </div>
+    <p class="piedino">Questa app serve a capire un'etichetta, non a sostituire il parere di un medico, di un dermatologo o del valutatore della sicurezza del prodotto.</p>
+  </section>
+
+  <!-- INSERIMENTO A MANO -->
+  <section class="vista" id="v-scrivi">
+    <h2>Scrivi la lista INCI</h2>
+    <p class="sottotitolo">Copia la lista come sta sulla confezione, con le virgole. Non importa se ci sono maiuscole o minuscole.</p>
+    <textarea id="testoInci" placeholder="Aqua, Glycerin, Cetearyl Alcohol, Niacinamide, Phenoxyethanol, Parfum..."></textarea>
+    <button class="esempio" id="btnEsempio">Prova con un esempio</button>
+    <button class="bottone" id="btnAnalizzaScritto">Analizza gli ingredienti</button>
+  </section>
+
+  <!-- FOTO -->
+  <section class="vista" id="v-foto">
+    <h2>Foto dell'etichetta</h2>
+    <p class="sottotitolo">Inquadra solo la lista degli ingredienti, da vicino e con buona luce. Poi puoi correggere a mano quello che l'app ha letto male.</p>
+    <input type="file" id="fileFoto" accept="image/*" capture="environment" hidden>
+    <button class="bottone" id="btnScatta">📷 Scatta o scegli una foto</button>
+    <img id="anteprima" alt="Anteprima dell'etichetta">
+    <div id="statoOcr"></div>
+    <div id="boxTestoOcr" hidden>
+      <h3>Testo letto dalla foto</h3>
+      <p class="nota" style="margin-top:0">Controlla e correggi: le etichette piccole si leggono male, capita spesso che una lettera venga scambiata.</p>
+      <textarea id="testoOcr"></textarea>
+      <button class="bottone" id="btnAnalizzaFoto">Analizza gli ingredienti</button>
+    </div>
+  </section>
+
+  <!-- NOME PRODOTTO -->
+  <section class="vista" id="v-nome">
+    <h2>Cerca per nome del prodotto</h2>
+    <p class="sottotitolo">Scrivi marca e nome, per esempio "Nivea crema mani", oppure il codice a barre. L&#39;app cerca in Open Beauty Facts, l&#39;archivio pubblico e gratuito dei cosmetici.</p>
+    <input type="text" id="campoNome" placeholder="Marca e nome, oppure codice a barre" autocomplete="off">
+    <button class="bottone" id="btnCerca">Cerca il prodotto</button>
+    <div id="risultatiRicerca"></div>
+    <p class="nota">Serve la connessione a internet. Se il prodotto non c'è, usa la foto dell'etichetta o scrivi la lista a mano: il risultato è lo stesso.</p>
+  </section>
+
+  <!-- 2. DESCRIZIONE -->
+  <section class="vista" id="v-descrizione">
+    <div id="riepilogo"></div>
+    <h3>Ingrediente per ingrediente</h3>
+    <p class="spiega">Tocca un ingrediente per aprirne la scheda completa. Sono in ordine di etichetta, cioè dal più abbondante al meno abbondante.</p>
+    <div id="elencoIngredienti"></div>
+    <button class="bottone" id="btnVaiClassifica">Vai alla classificazione →</button>
+    <p class="piedino" id="notaStime"></p>
+  </section>
+
+  <!-- 3. CLASSIFICAZIONE -->
+  <section class="vista" id="v-classificazione">
+    <h2>Classificazione degli ingredienti</h2>
+    <p class="sottotitolo">Ogni ingrediente di un cosmetico ha un ruolo. Qui sono divisi nei tre ruoli fondamentali.</p>
+    <div id="classificazione"></div>
+    <div class="riga-bottoni">
+      <button class="bottone secondario" id="btnTornaDescrizione">‹ Descrizione</button>
+      <button class="bottone" id="btnNuova">Nuova analisi</button>
+    </div>
+  </section>
+
+</main>
+
+<script src="./data/ingredients.js"></script>
+<script src="./data/ingredients2.js"></script>
+<script src="./data/ingredients3.js"></script>
+<script src="./data/rules.js"></script>
+<script src="./js/motore.js"></script>
+<script src="./js/app.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function(){ navigator.serviceWorker.register('./sw.js').catch(function(){}); });
+}
+</script>
+</body>
+</html>
